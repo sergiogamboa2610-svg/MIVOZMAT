@@ -12,10 +12,10 @@ const CHARACTER_IMAGES={
 const DEFAULT_DATA={
   activeCharacter:'bruno',
   characters:{
-    bruno:{id:'bruno',name:'Bruno',emoji:'🐶',image:CHARACTER_IMAGES.bruno,role:'Constructor tranquilo',desc:'Amigable, protector y claro.',welcome:'Hola campeón, estoy contigo.',voiceAudio:''},
-    luna:{id:'luna',name:'Luna',emoji:'🐕',image:CHARACTER_IMAGES.luna,role:'Cachorrita cariñosa',desc:'Dulce, paciente y suave.',welcome:'Hola, vamos a aprender juntos.',voiceAudio:''},
-    max:{id:'max',name:'Max',emoji:'🚚',image:CHARACTER_IMAGES.max,role:'Camión feliz',desc:'Divertido y con energía.',welcome:'¡Vamos, tú puedes!',voiceAudio:''},
-    tito:{id:'tito',name:'Tito',emoji:'🚜',image:CHARACTER_IMAGES.tito,role:'Tractor de calma',desc:'Ideal para respirar y volver a intentar.',welcome:'Respira tranquilo, estoy aquí.',voiceAudio:''}
+    bruno:{id:'bruno',name:'Rubble',emoji:'🐶',image:CHARACTER_IMAGES.bruno,role:'Constructor tranquilo',desc:'Amigable, protector y claro.',welcome:'Hola campeón, estoy contigo.',voiceAudio:''},
+    luna:{id:'luna',name:'Rocky',emoji:'🐕',image:CHARACTER_IMAGES.luna,role:'Cachorrita cariñosa',desc:'Dulce, paciente y suave.',welcome:'Hola, vamos a aprender juntos.',voiceAudio:''},
+    max:{id:'max',name:'Escabadora Rubble',emoji:'🚚',image:CHARACTER_IMAGES.max,role:'Camión feliz',desc:'Divertido y con energía.',welcome:'¡Vamos, tú puedes!',voiceAudio:''},
+    tito:{id:'tito',name:'Rocky Movil',emoji:'🚜',image:CHARACTER_IMAGES.tito,role:'Tractor de calma',desc:'Ideal para respirar y volver a intentar.',welcome:'Respira tranquilo, estoy aquí.',voiceAudio:''}
   },
   categories:{
     'Necesidades':[
