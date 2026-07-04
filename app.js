@@ -3,13 +3,19 @@ const LEGACY_STORE_KEYS=['miVozV3Data','miVozData'];
 const BACKUP_DB='miVozLocalBackup';
 const BACKUP_STORE='snapshots';
 const BACKUP_ID='main';
+const CHARACTER_IMAGES={
+  bruno:'./images.jpg',
+  luna:'./imagen 2.jpg',
+  max:'./imagen 3.jpg',
+  tito:'./imagen 4.webp'
+};
 const DEFAULT_DATA={
   activeCharacter:'bruno',
   characters:{
-    bruno:{id:'bruno',name:'Bruno',emoji:'🐶',role:'Constructor tranquilo',desc:'Amigable, protector y claro.',welcome:'Hola campeón, estoy contigo.',voiceAudio:''},
-    luna:{id:'luna',name:'Luna',emoji:'🐕',role:'Cachorrita cariñosa',desc:'Dulce, paciente y suave.',welcome:'Hola, vamos a aprender juntos.',voiceAudio:''},
-    max:{id:'max',name:'Max',emoji:'🚚',role:'Camión feliz',desc:'Divertido y con energía.',welcome:'¡Vamos, tú puedes!',voiceAudio:''},
-    tito:{id:'tito',name:'Tito',emoji:'🚜',role:'Tractor de calma',desc:'Ideal para respirar y volver a intentar.',welcome:'Respira tranquilo, estoy aquí.',voiceAudio:''}
+    bruno:{id:'bruno',name:'Bruno',emoji:'🐶',image:CHARACTER_IMAGES.bruno,role:'Constructor tranquilo',desc:'Amigable, protector y claro.',welcome:'Hola campeón, estoy contigo.',voiceAudio:''},
+    luna:{id:'luna',name:'Luna',emoji:'🐕',image:CHARACTER_IMAGES.luna,role:'Cachorrita cariñosa',desc:'Dulce, paciente y suave.',welcome:'Hola, vamos a aprender juntos.',voiceAudio:''},
+    max:{id:'max',name:'Max',emoji:'🚚',image:CHARACTER_IMAGES.max,role:'Camión feliz',desc:'Divertido y con energía.',welcome:'¡Vamos, tú puedes!',voiceAudio:''},
+    tito:{id:'tito',name:'Tito',emoji:'🚜',image:CHARACTER_IMAGES.tito,role:'Tractor de calma',desc:'Ideal para respirar y volver a intentar.',welcome:'Respira tranquilo, estoy aquí.',voiceAudio:''}
   },
   categories:{
     'Necesidades':[
@@ -32,6 +38,13 @@ const DEFAULT_DATA={
   }, stats:{}, settings:{rate:.9,pitch:1.2,useRecorded:true,celebrate:true,voiceIndex:0}
 };
 let data=load(), currentCategory=Object.keys(data.categories)[0], currentVideoCategory=Object.keys(data.videos||{'Canciones':[]})[0], voices=[], currentRoutine='morning', currentGame='coloring', breathingTimer=null;
+function ensureCharacterImages(target){
+  if(!target?.characters)return;
+  Object.entries(CHARACTER_IMAGES).forEach(([id,src])=>{
+    if(target.characters[id]&&!target.characters[id].image)target.characters[id].image=src;
+  });
+}
+ensureCharacterImages(data);
 const routines={morning:[['🌞','Me despierto'],['🚽','Voy al baño'],['🪥','Me lavo los dientes'],['👕','Me visto'],['🍽️','Desayuno']],night:[['🛁','Me baño'],['🧸','Guardo juguetes'],['🪥','Me lavo los dientes'],['📘','Cuento'],['🛏️','Dormir']],school:[['🎒','Preparo bulto'],['🚗','Voy a la escuela'],['👋','Saludo'],['🍎','Merienda'],['🏠','Regreso a casa']]};
 const calmItems=[['Estoy triste','Estoy triste','😢'],['Estoy enojado','Estoy enojado','😠'],['Tengo miedo','Tengo miedo','😟'],['Me duele','Me duele','🤕'],['Abrazo','Quiero un abrazo','🤗'],['Silencio','Quiero silencio','🤫'],['Descanso','Quiero descansar','🛏️'],['Ayuda','Necesito ayuda','🆘']];
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
@@ -117,6 +130,7 @@ async function recoverFromBackup(){
   const backup=await readBackup();
   if(!backup)return;
   data=mergeData(backup);
+  ensureCharacterImages(data);
   try{localStorage.setItem(STORE_KEY,JSON.stringify(data))}catch{}
   sessionStorage.setItem('miVozRecovered','1');
   toast('Datos recuperados desde respaldo local');
@@ -130,8 +144,8 @@ function playAudio(src){return new Promise((res,rej)=>{const a=new Audio(src);a.
 async function speak(text, audio=''){recordUse(text); if(data.settings.useRecorded&&audio){try{await playAudio(audio);return}catch{}} if('speechSynthesis' in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='es-CR';u.rate=data.settings.rate;u.pitch=data.settings.pitch;if(voices[data.settings.voiceIndex])u.voice=voices[data.settings.voiceIndex];speechSynthesis.speak(u)}else toast(text)}
 async function characterSpeak(text){const c=activeChar(); if(data.settings.useRecorded&&c.voiceAudio){try{await playAudio(c.voiceAudio);return}catch{}} speak(text||c.welcome)}
 function initNav(){ $$('.nav-btn').forEach(b=>b.onclick=()=>{ $$('.nav-btn,.view').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('#'+b.dataset.view).classList.add('active'); if(b.dataset.view==='play')setTimeout(drawTemplate,80); if(b.dataset.view==='reports')renderStats();}); }
-function renderCharacters(){const g=$('#characterGrid');g.innerHTML='';Object.values(data.characters).forEach(c=>{const card=document.createElement('button');card.className='character-card '+(c.id===data.activeCharacter?'active':'');card.innerHTML=`<div class="character-top"><div class="character-emoji">${c.emoji}</div><div><h3>${c.name}</h3><p>${c.role}</p></div></div><span class="tag">${c.desc}</span>`;card.onclick=()=>{data.activeCharacter=c.id;save();renderCharacters();updateHero();characterSpeak(c.welcome)};g.appendChild(card)});}
-function updateHero(){const c=activeChar();$('#activeMascotEmoji').textContent=c.emoji}
+function renderCharacters(){const g=$('#characterGrid');g.innerHTML='';Object.values(data.characters).forEach(c=>{const avatar=c.image?`<img src="${c.image}" alt="${c.name}" style="width:56px;height:56px;border-radius:16px;object-fit:cover" onerror="this.outerHTML='${c.emoji}'">`:c.emoji;const card=document.createElement('button');card.className='character-card '+(c.id===data.activeCharacter?'active':'');card.innerHTML=`<div class="character-top"><div class="character-emoji">${avatar}</div><div><h3>${c.name}</h3><p>${c.role}</p></div></div><span class="tag">${c.desc}</span>`;card.onclick=()=>{data.activeCharacter=c.id;save();renderCharacters();updateHero();characterSpeak(c.welcome)};g.appendChild(card)});}
+function updateHero(){const c=activeChar();const mascot=$('#activeMascotEmoji');if(!mascot)return;mascot.innerHTML=c.image?`<img src="${c.image}" alt="${c.name}" style="width:100%;height:100%;border-radius:inherit;object-fit:cover" onerror="this.parentElement.textContent='${c.emoji}'">`:c.emoji}
 function renderCategories(){const bar=$('#categoryBar');bar.innerHTML='';Object.keys(data.categories).forEach(c=>{const b=document.createElement('button');b.className='chip '+(c===currentCategory?'active':'');b.textContent=c;b.onclick=()=>{currentCategory=c;renderCategories();renderTalk()};bar.appendChild(b)})}
 function renderTalk(){const g=$('#talkGrid');g.innerHTML='';(data.categories[currentCategory]||[]).forEach(item=>{const b=document.createElement('button');b.className='talk-card';b.innerHTML=`<div>${item.emoji}</div><div class="label">${item.label}</div><div class="phrase">${item.phrase}</div>`;b.onclick=()=>speak(item.phrase,item.audio);g.appendChild(b)})}
 function initQuick(){ $$('.quick-card').forEach(b=>b.onclick=()=>speak(b.dataset.say)); $('#speakWelcomeBtn').onclick=()=>characterSpeak(activeChar().welcome); }
