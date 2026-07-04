@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#FFCF4A" />
+  <title>Mi Voz V2 - Amigos de ConstruVilla</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero-left">
+        <div class="mascot-badge" id="activeMascotEmoji">🐶</div>
+        <div>
+          <h1>Mi Voz V2</h1>
+          <p>Los Amigos de ConstruVilla</p>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button id="installBtn" class="btn light hidden">Instalar app</button>
+        <button id="speakWelcomeBtn" class="btn primary">Saludar</button>
+      </div>
+    </header>
+
+    <nav class="bottom-tabs" aria-label="Menú principal">
+      <button class="nav-btn active" data-view="home">🏠 Inicio</button>
+      <button class="nav-btn" data-view="talk">🗣️ Hablar</button>
+      <button class="nav-btn" data-view="family">👨‍👩‍👦 Familia</button>
+      <button class="nav-btn" data-view="routines">✅ Rutinas</button>
+      <button class="nav-btn" data-view="calm">🌈 Calma</button>
+      <button class="nav-btn" data-view="videos">📺 Videos</button>
+      <button class="nav-btn" data-view="play">🎨 Juegos</button>
+      <button class="nav-btn" data-view="reports">📊 Uso</button>
+      <button class="nav-btn" data-view="settings">⚙️ Ajustes</button>
+    </nav>
+
+    <main>
+      <section id="home" class="view active">
+        <div class="section-heading">
+          <h2>Escoge un amigo</h2>
+          <p>Cada personaje puede tener su propia voz grabada o usar una voz infantil del navegador.</p>
+        </div>
+        <div id="characterGrid" class="character-grid"></div>
+        <div class="panel quick-panel">
+          <h3>Accesos rápidos</h3>
+          <div class="quick-grid">
+            <button class="quick-card" data-say="Quiero agua">💧<span>Agua</span></button>
+            <button class="quick-card" data-say="Quiero comer">🍽️<span>Comer</span></button>
+            <button class="quick-card" data-say="Necesito ayuda">🆘<span>Ayuda</span></button>
+            <button class="quick-card" data-say="Quiero jugar">🧸<span>Jugar</span></button>
+          </div>
+        </div>
+      </section>
+
+      <section id="talk" class="view">
+        <div class="section-heading">
+          <h2>Comunicador visual</h2>
+          <p>Toca una tarjeta para escuchar la frase. Puedes editar tarjetas desde Ajustes.</p>
+        </div>
+        <div id="categoryBar" class="category-bar"></div>
+        <div id="talkGrid" class="talk-grid"></div>
+      </section>
+
+      <section id="family" class="view">
+        <div class="section-heading">
+          <h2>Mi familia</h2>
+          <p>Agrega fotos reales y audios. Si no subes audio, la app dirá el nombre con voz del navegador.</p>
+        </div>
+        <form id="familyForm" class="panel form-grid">
+          <label>Nombre
+            <input id="familyName" required placeholder="Mamá, Papá, Abuela..." />
+          </label>
+          <label>Frase al tocar
+            <input id="familyPhrase" placeholder="Quiero ver a mamá" />
+          </label>
+          <label>Foto
+            <input id="familyPhoto" type="file" accept="image/*" />
+          </label>
+          <label>Audio opcional
+            <input id="familyAudio" type="file" accept="audio/*" />
+          </label>
+          <button class="btn primary" type="submit">Agregar</button>
+        </form>
+        <div id="familyGrid" class="talk-grid"></div>
+      </section>
+
+      <section id="routines" class="view">
+        <div class="section-heading">
+          <h2>Rutinas visuales</h2>
+          <p>Marca cada paso. Al terminar, el personaje celebra con una frase suave.</p>
+        </div>
+        <div class="routine-selector panel">
+          <button class="btn primary routine-tab" data-routine="morning">🌞 Mañana</button>
+          <button class="btn light routine-tab" data-routine="night">🌙 Noche</button>
+          <button class="btn light routine-tab" data-routine="school">🎒 Escuela</button>
+        </div>
+        <div id="routineList" class="routine-list"></div>
+      </section>
+
+      <section id="calm" class="view">
+        <div class="section-heading">
+          <h2>Zona de calma</h2>
+          <p>Botones simples para momentos de frustración, cansancio o tristeza.</p>
+        </div>
+        <div class="calm-layout">
+          <div id="calmGrid" class="talk-grid"></div>
+          <div class="panel breathing-card">
+            <h3>Respiremos juntos</h3>
+            <div id="breathingCircle" class="breathing-circle">Respira</div>
+            <button id="breathingBtn" class="btn primary">Iniciar 30 segundos</button>
+          </div>
+        </div>
+      </section>
+
+
+      <section id="videos" class="view">
+        <div class="section-heading">
+          <h2>Videos tranquilos</h2>
+          <p>Una zona tipo “videos para niños”, pero curada por mamá/papá. Puedes agregar enlaces de YouTube o videos locales.</p>
+        </div>
+        <div class="video-layout">
+          <div class="panel video-player-panel">
+            <div id="videoPlayer" class="video-player-placeholder">
+              <div class="big-icon">📺</div>
+              <h3>Elige un video</h3>
+              <p>Selecciona una tarjeta para reproducir.</p>
+            </div>
+            <div class="video-actions">
+              <button id="stopVideoBtn" class="btn danger">Detener video</button>
+              <button id="videoPraiseBtn" class="btn primary">Celebrar</button>
+            </div>
+          </div>
+          <div>
+            <div id="videoCategoryBar" class="category-bar"></div>
+            <div id="videoGrid" class="video-grid"></div>
+          </div>
+        </div>
+        <div class="panel parent-note">
+          <h3>Modo seguro por curaduría</h3>
+          <p>Esta pestaña no abre un buscador libre. Solo muestra los videos que tú agregues en Ajustes, para mantener la experiencia controlada y predecible.</p>
+        </div>
+      </section>
+
+      <section id="play" class="view">
+        <div class="section-heading">
+          <h2>Juegos tranquilos</h2>
+          <p>Colorear y rompecabezas de 2 o 3 piezas.</p>
+        </div>
+        <div class="game-tabs panel">
+          <button class="btn primary game-tab" data-game="coloring">🎨 Colorear</button>
+          <button class="btn light game-tab" data-game="puzzle">🧩 Rompecabezas</button>
+          <button class="btn light game-tab" data-game="match">✨ Asociar</button>
+        </div>
+        <div id="coloringGame" class="game-panel active-game">
+          <div class="activity-layout">
+            <aside class="panel tools">
+              <button class="templateBtn" data-template="pup">Perrito</button>
+              <button class="templateBtn" data-template="truck">Camión</button>
+              <button class="templateBtn" data-template="star">Estrella</button>
+              <label>Color <input id="paintColor" type="color" value="#FF7A3D" /></label>
+              <label>Tamaño <input id="brushSize" type="range" min="4" max="44" value="18" /></label>
+              <button id="eraserBtn" class="btn light">Borrador</button>
+              <button id="clearCanvasBtn" class="btn danger">Limpiar</button>
+            </aside>
+            <canvas id="paintCanvas" width="1000" height="650"></canvas>
+          </div>
+        </div>
+        <div id="puzzleGame" class="game-panel">
+          <div class="panel puzzle-controls">
+            <label>Piezas
+              <select id="pieceCount"><option value="2">2 piezas</option><option value="3">3 piezas</option></select>
+            </label>
+            <label>Imagen
+              <select id="puzzleKind"><option value="pup">Perrito constructor</option><option value="truck">Camión feliz</option><option value="heart">Corazón familiar</option></select>
+            </label>
+            <button id="newPuzzleBtn" class="btn primary">Nuevo</button>
+          </div>
+          <div id="puzzleStatus" class="status"></div>
+          <div class="puzzle-wrap">
+            <div id="dropZone" class="drop-zone"></div>
+            <div id="piecesZone" class="pieces-zone"></div>
+          </div>
+        </div>
+        <div id="matchGame" class="game-panel">
+          <div class="panel"><button id="newMatchBtn" class="btn primary">Nueva ronda</button></div>
+          <div id="matchGrid" class="match-grid"></div>
+        </div>
+      </section>
+
+      <section id="reports" class="view">
+        <div class="section-heading">
+          <h2>Uso de palabras</h2>
+          <p>Información local para ver qué palabras se usan más. No se envía a internet.</p>
+        </div>
+        <div class="panel"><button id="clearStatsBtn" class="btn danger">Limpiar historial</button></div>
+        <div id="statsList" class="stats-list"></div>
+      </section>
+
+      <section id="settings" class="view">
+        <div class="section-heading">
+          <h2>Ajustes y personalización</h2>
+          <p>Configura voces, frases y personajes.</p>
+        </div>
+        <div class="settings-grid">
+          <div class="panel">
+            <h3>Voz del navegador</h3>
+            <label>Voz
+              <select id="voiceSelect"></select>
+            </label>
+            <label>Velocidad
+              <input id="rateRange" type="range" min="0.55" max="1.25" step="0.05" value="0.9" />
+            </label>
+            <label>Tono
+              <input id="pitchRange" type="range" min="0.8" max="1.8" step="0.05" value="1.2" />
+            </label>
+            <label class="switch"><input id="useRecordedToggle" type="checkbox" checked /> Usar audios grabados si existen</label>
+            <label class="switch"><input id="celebrateToggle" type="checkbox" checked /> Celebraciones suaves</label>
+          </div>
+          <div class="panel">
+            <h3>Voces por personaje</h3>
+            <p class="muted">Sube un audio corto de saludo/refuerzo por personaje. Ej: “Hola campeón”.</p>
+            <div id="characterVoiceSettings"></div>
+          </div>
+          <div class="panel wide">
+            <h3>Agregar tarjeta de vocabulario</h3>
+            <form id="wordForm" class="form-grid">
+              <label>Categoría <input id="wordCategory" placeholder="Necesidades" required /></label>
+              <label>Texto <input id="wordLabel" placeholder="Agua" required /></label>
+              <label>Frase <input id="wordPhrase" placeholder="Quiero agua" required /></label>
+              <label>Emoji <input id="wordEmoji" placeholder="💧" required /></label>
+              <label>Audio opcional <input id="wordAudio" type="file" accept="audio/*" /></label>
+              <button class="btn primary" type="submit">Agregar tarjeta</button>
+            </form>
+          </div>
+
+          <div class="panel wide">
+            <h3>Agregar video</h3>
+            <p class="muted">Puedes agregar un enlace de YouTube, un enlace embed, o subir un video local corto. Recomendado: videos breves, tranquilos y previamente revisados.</p>
+            <form id="videoForm" class="form-grid">
+              <label>Categoría <input id="videoCategory" placeholder="Canciones, Animales, Aprender" required /></label>
+              <label>Título <input id="videoTitle" placeholder="Canción de buenos días" required /></label>
+              <label>Emoji <input id="videoEmoji" placeholder="🎵" required /></label>
+              <label>URL YouTube/opcional <input id="videoUrl" placeholder="https://www.youtube.com/watch?v=..." /></label>
+              <label>Video local/opcional <input id="videoFile" type="file" accept="video/*" /></label>
+              <button class="btn primary" type="submit">Agregar video</button>
+            </form>
+          </div>
+
+          <div class="panel wide">
+            <h3>Administración</h3>
+            <button id="exportBtn" class="btn light">Exportar datos JSON</button>
+            <button id="importBtn" class="btn light">Importar datos JSON</button>
+            <input id="importFile" class="hidden" type="file" accept="application/json" />
+            <button id="resetAllBtn" class="btn danger">Restaurar todo</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>

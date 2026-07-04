@@ -1,0 +1,15 @@
+{
+  "name": "Mi Voz V3 - ConstruVilla con Videos",
+  "short_name": "Mi Voz V3",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fff7dc",
+  "theme_color": "#FFCF4A",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
