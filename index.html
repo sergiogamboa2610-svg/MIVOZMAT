@@ -66,23 +66,8 @@
       <section id="family" class="view">
         <div class="section-heading">
           <h2>Mi familia</h2>
-          <p>Agrega fotos reales y audios. Si no subes audio, la app dirá el nombre con voz del navegador.</p>
+          <p>Este espacio es solo para fotos y tarjetas familiares. Para agregar o editar datos, usa Ajustes.</p>
         </div>
-        <form id="familyForm" class="panel form-grid">
-          <label>Nombre
-            <input id="familyName" required placeholder="Mamá, Papá, Abuela..." />
-          </label>
-          <label>Frase al tocar
-            <input id="familyPhrase" placeholder="Quiero ver a mamá" />
-          </label>
-          <label>Foto
-            <input id="familyPhoto" type="file" accept="image/*" />
-          </label>
-          <label>Audio opcional
-            <input id="familyAudio" type="file" accept="audio/*" />
-          </label>
-          <button class="btn primary" type="submit">Agregar</button>
-        </form>
         <div id="familyGrid" class="talk-grid"></div>
       </section>
 
@@ -232,6 +217,26 @@
               <label>Emoji <input id="wordEmoji" placeholder="💧" required /></label>
               <label>Audio opcional <input id="wordAudio" type="file" accept="audio/*" /></label>
               <button class="btn primary" type="submit">Agregar tarjeta</button>
+            </form>
+          </div>
+
+          <div class="panel wide">
+            <h3>Familia: agregar datos y fotos</h3>
+            <p class="muted">Los perfiles que agregues aquí aparecerán en la pestaña Familia.</p>
+            <form id="familyForm" class="form-grid">
+              <label>Nombre
+                <input id="familyName" required placeholder="Mamá, Papá, Abuela..." />
+              </label>
+              <label>Frase al tocar
+                <input id="familyPhrase" placeholder="Quiero ver a mamá" />
+              </label>
+              <label>Foto
+                <input id="familyPhoto" type="file" accept="image/*" />
+              </label>
+              <label>Audio opcional
+                <input id="familyAudio" type="file" accept="audio/*" />
+              </label>
+              <button class="btn primary" type="submit">Agregar familiar</button>
             </form>
           </div>
 
