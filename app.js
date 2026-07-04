@@ -1,4 +1,8 @@
 const STORE_KEY='miVozV2Data';
+const LEGACY_STORE_KEYS=['miVozV3Data','miVozData'];
+const BACKUP_DB='miVozLocalBackup';
+const BACKUP_STORE='snapshots';
+const BACKUP_ID='main';
 const DEFAULT_DATA={
   activeCharacter:'bruno',
   characters:{
@@ -31,7 +35,93 @@ let data=load(), currentCategory=Object.keys(data.categories)[0], currentVideoCa
 const routines={morning:[['🌞','Me despierto'],['🚽','Voy al baño'],['🪥','Me lavo los dientes'],['👕','Me visto'],['🍽️','Desayuno']],night:[['🛁','Me baño'],['🧸','Guardo juguetes'],['🪥','Me lavo los dientes'],['📘','Cuento'],['🛏️','Dormir']],school:[['🎒','Preparo bulto'],['🚗','Voy a la escuela'],['👋','Saludo'],['🍎','Merienda'],['🏠','Regreso a casa']]};
 const calmItems=[['Estoy triste','Estoy triste','😢'],['Estoy enojado','Estoy enojado','😠'],['Tengo miedo','Tengo miedo','😟'],['Me duele','Me duele','🤕'],['Abrazo','Quiero un abrazo','🤗'],['Silencio','Quiero silencio','🤫'],['Descanso','Quiero descansar','🛏️'],['Ayuda','Necesito ayuda','🆘']];
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
-function clone(o){return JSON.parse(JSON.stringify(o))} function load(){try{return Object.assign(clone(DEFAULT_DATA),JSON.parse(localStorage.getItem(STORE_KEY)||'{}'))}catch{return clone(DEFAULT_DATA)}} function save(){localStorage.setItem(STORE_KEY,JSON.stringify(data))}
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function mergeData(raw){return Object.assign(clone(DEFAULT_DATA),raw||{})}
+function readLocalData(){
+  const keys=[STORE_KEY,...LEGACY_STORE_KEYS];
+  for(const key of keys){
+    try{
+      const raw=localStorage.getItem(key);
+      if(raw){
+        const parsed=JSON.parse(raw);
+        if(key!==STORE_KEY)localStorage.setItem(STORE_KEY,raw);
+        return mergeData(parsed);
+      }
+    }catch{}
+  }
+  return clone(DEFAULT_DATA);
+}
+function load(){return readLocalData()}
+function hasLocalSnapshot(){
+  try{return [STORE_KEY,...LEGACY_STORE_KEYS].some(k=>!!localStorage.getItem(k))}catch{return false}
+}
+function openBackupDb(){
+  return new Promise((resolve,reject)=>{
+    if(!('indexedDB' in window)){resolve(null);return;}
+    const req=indexedDB.open(BACKUP_DB,1);
+    req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(BACKUP_STORE))req.result.createObjectStore(BACKUP_STORE)};
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function writeBackup(snapshot){
+  try{
+    const db=await openBackupDb();
+    if(!db)return;
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction(BACKUP_STORE,'readwrite');
+      tx.objectStore(BACKUP_STORE).put(snapshot,BACKUP_ID);
+      tx.oncomplete=resolve;
+      tx.onerror=()=>reject(tx.error);
+    });
+    db.close();
+  }catch{}
+}
+async function readBackup(){
+  try{
+    const db=await openBackupDb();
+    if(!db)return null;
+    const value=await new Promise((resolve,reject)=>{
+      const tx=db.transaction(BACKUP_STORE,'readonly');
+      const req=tx.objectStore(BACKUP_STORE).get(BACKUP_ID);
+      req.onsuccess=()=>resolve(req.result||null);
+      req.onerror=()=>reject(req.error);
+    });
+    db.close();
+    return value;
+  }catch{return null}
+}
+async function clearBackup(){
+  try{
+    const db=await openBackupDb();
+    if(!db)return;
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction(BACKUP_STORE,'readwrite');
+      tx.objectStore(BACKUP_STORE).delete(BACKUP_ID);
+      tx.oncomplete=resolve;
+      tx.onerror=()=>reject(tx.error);
+    });
+    db.close();
+  }catch{}
+}
+async function requestPersistentStorage(){
+  try{if(navigator.storage?.persist)await navigator.storage.persist()}catch{}
+}
+function save(){
+  try{localStorage.setItem(STORE_KEY,JSON.stringify(data))}catch{}
+  writeBackup(data);
+}
+async function recoverFromBackup(){
+  if(hasLocalSnapshot())return;
+  if(sessionStorage.getItem('miVozRecovered')==='1')return;
+  const backup=await readBackup();
+  if(!backup)return;
+  data=mergeData(backup);
+  try{localStorage.setItem(STORE_KEY,JSON.stringify(data))}catch{}
+  sessionStorage.setItem('miVozRecovered','1');
+  toast('Datos recuperados desde respaldo local');
+  setTimeout(()=>location.reload(),250);
+}
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1700)}
 function fileToDataURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
 function activeChar(){return data.characters[data.activeCharacter]||data.characters.bruno}
@@ -107,7 +197,9 @@ $('#videoForm').onsubmit=async e=>{
   data.videos[cat].push({title,emoji,url,file,source:file?'local':'youtube'});
   save(); currentVideoCategory=cat; e.target.reset(); renderVideoCategories(); renderVideos(); toast('Video agregado');
 };
-$('#exportBtn').onclick=()=>{let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mi-voz-v2-datos.json';a.click()};$('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;let txt=await f.text();data=Object.assign(clone(DEFAULT_DATA),JSON.parse(txt));save();location.reload()};$('#resetAllBtn').onclick=()=>{if(confirm('¿Restaurar todos los datos?')){localStorage.removeItem(STORE_KEY);location.reload()}};$('#clearStatsBtn').onclick=()=>{data.stats={};save();renderStats()};}
+$('#exportBtn').onclick=()=>{let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mi-voz-v2-datos.json';a.click()};$('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;let txt=await f.text();data=Object.assign(clone(DEFAULT_DATA),JSON.parse(txt));save();location.reload()};$('#resetAllBtn').onclick=async ()=>{if(confirm('¿Restaurar todos los datos?')){try{[STORE_KEY,...LEGACY_STORE_KEYS].forEach(k=>localStorage.removeItem(k))}catch{};await clearBackup();location.reload()}};$('#clearStatsBtn').onclick=()=>{data.stats={};save();renderStats()};}
 function renderCharVoiceSettings(){let box=$('#characterVoiceSettings');box.innerHTML='';Object.values(data.characters).forEach(c=>{let row=document.createElement('div');row.className='char-voice-row';row.innerHTML=`<b>${c.emoji} ${c.name}</b><input type="file" accept="audio/*" data-char="${c.id}"><button class="btn light" data-test="${c.id}">Probar</button>`;box.appendChild(row)});box.querySelectorAll('input[type=file]').forEach(inp=>inp.onchange=async e=>{let f=e.target.files[0];if(!f)return;data.characters[inp.dataset.char].voiceAudio=await fileToDataURL(f);save();toast('Voz guardada')});box.querySelectorAll('[data-test]').forEach(b=>b.onclick=()=>{data.activeCharacter=b.dataset.test;save();updateHero();renderCharacters();characterSpeak(data.characters[b.dataset.test].welcome)})}
 let deferredPrompt;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('#installBtn').classList.remove('hidden')});$('#installBtn').onclick=()=>deferredPrompt?.prompt(); if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js');
 initNav();renderCharacters();updateHero();renderCategories();renderTalk();initQuick();initFamily();renderFamily();initRoutines();renderCalm();initBreathing();initVideos();initPaint();initGames();initSettings();renderStats();
+requestPersistentStorage();
+recoverFromBackup();
